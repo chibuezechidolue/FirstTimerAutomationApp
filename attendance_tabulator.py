@@ -17,12 +17,6 @@ def insert_cell_value(worksheet,cell_label,value,col_num,addr_list):
         worksheet.cell(f"{cell_label}{col_num}").set_number_format(pygsheets.custom_types.FormatType.TEXT) 
     worksheet.update_value(addr=f"{cell_label}{col_num}", val=val_to_update, parse=None)
      
-def check_if_phone_no(value):
-    try:
-        int(value)
-    except:
-        return False
-    return True
 
 def tabulate_result(first_timer_info:list,sheet_name,client,date,addr_list:list):
     """To transfer and tabulate the first_timer_info to an online google sheet"""
@@ -71,3 +65,39 @@ def tabulate_result(first_timer_info:list,sheet_name,client,date,addr_list:list)
             worksht.cell(f"{addr_list[0]}{col_num+n}").value= n+1
             worksht.cell(f"{addr_list[0]}{col_num+n}").set_horizontal_alignment(pygsheets.custom_types.HorizontalAlignment.CENTER)
             insert_cell_value(worksheet=worksht,cell_label=label,value=info,col_num=col_num+n,addr_list=addr_list)
+
+
+
+def check_if_phone_no(value):
+    try:
+        int(value)
+    except:
+        return False
+    return True
+
+
+def convert_txt_to_list(txt_file)->list:
+    with open(txt_file, 'r') as in_file:
+        stripped = [line.strip() for line in in_file]
+        lines = [line.split(" ") for line in stripped if line]
+        return lines
+    
+
+DATE=input("Please fill in the Date for This attendance: ")
+
+address_list=input('Please type in 4 Column Label(e.g. A,B,C,D): ').upper()
+
+ADDRESS_LIST=address_list.split(",")
+print('Trying to authorize the client ...')
+client = pygsheets.authorize(service_account_file='JSON/FOLDER/first-timers-attendance.json')
+print('client authorized')
+print(" Now Tabulating... ")
+print('Please do not close the app')
+
+output=convert_txt_to_list(txt_file='first_timers_info.txt')
+
+tabulate_result(addr_list=ADDRESS_LIST,first_timer_info=output,sheet_name="First Timers Attendance",client=client,date=DATE)
+
+print('Tabulation done')
+time.sleep(5)
+print('Finished !!!')
